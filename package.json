@@ -17,8 +17,8 @@
     "docker:verifier": "docker build -t hembench-verifier ./verification"
   },
   "dependencies": {
-    "@benchlocal/core": "^0.1.0",
-    "@benchlocal/sdk": "^0.1.0"
+    "@benchlocal/core": "^0.3.0",
+    "@benchlocal/sdk": "^0.3.0"
   },
   "devDependencies": {
     "@types/node": "latest",

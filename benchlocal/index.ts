@@ -72,13 +72,18 @@ export default defineBenchPack({
 
   async prepare(context) {
     const helpers = createHostHelpers(context);
-    const verifierBaseUrl = helpers.getVerifierBaseUrl("hemlock-runner");
+    const verifier = helpers.getRequiredVerifier("hemlock-runner");
+    const verifierBaseUrl = verifier.url;
+    if (!verifierBaseUrl) {
+      throw new Error("hemlock-runner verifier is missing a url");
+    }
 
     return {
       async runScenario(input: ScenarioRunInput, emit: ProgressEmitter): Promise<ScenarioResult> {
         const task = helpers.getScenarioById(TASKS, input.scenario.id) as Task;
         const provider = helpers.getRequiredProvider(input.model.provider, { enabledOnly: true });
         const gen = helpers.resolveGenerationRequest(input.generation);
+        const timeoutSec = gen.request_timeout_seconds ?? 300;
 
         const emitProgress = async (message: string) => {
           await emit({
@@ -94,8 +99,8 @@ export default defineBenchPack({
           toModelConfig(input, provider.baseUrl, helpers.getSecretValue(input.model.provider)),
           {
             temperature: gen.temperature ?? 0.2,
-            maxTokens: gen.maxTokens ?? 8192,
-            llmTimeoutMs: 300_000,
+            maxTokens: gen.max_tokens ?? 8192,
+            llmTimeoutMs: timeoutSec * 1000,
             signal: input.abortSignal,
           },
           { baseUrl: verifierBaseUrl },
@@ -119,16 +124,22 @@ export default defineBenchPack({
           note: run.errorMessage,
           rawLog: log,
           output: {
-            text: run.extractedCode,
+            finalAnswer: run.extractedCode,
+            assistantMessages: run.rawResponse ? [run.rawResponse] : undefined,
           },
           verifier: run.verifier
             ? {
-                pass: run.verifier.pass,
-                category: run.verifier.category,
-                actualOutput: run.verifier.actual_output,
-                stderr: run.verifier.stderr,
-                exitCode: run.verifier.exit_code,
-                durationMs: run.verifier.duration_ms,
+                status: run.verifier.category,
+                summary: describeCategory(run.verifier.category),
+                details: {
+                  pass: run.verifier.pass,
+                  exitCode: run.verifier.exit_code,
+                  actualOutput: run.verifier.actual_output,
+                  stderr: run.verifier.stderr,
+                  durationMs: run.verifier.duration_ms,
+                  parses: run.verifier.parses,
+                  runs: run.verifier.runs,
+                },
               }
             : undefined,
           timings: {

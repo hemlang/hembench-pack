@@ -1,0 +1,28 @@
+{
+  "name": "hembench",
+  "version": "0.1.0",
+  "description": "BenchLocal Bench Pack for the Hemlock programming language — 38 code-generation tasks scored by executing generated code in a sandboxed interpreter.",
+  "license": "MIT",
+  "author": "hemlang",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hemlang/hembench-pack.git"
+  },
+  "scripts": {
+    "build:benchlocal": "tsc -p tsconfig.benchlocal.json && tsc-alias -p tsconfig.benchlocal.json",
+    "build:cli": "tsc -p tsconfig.cli.json && tsc-alias -p tsconfig.cli.json",
+    "build": "npm run build:benchlocal && npm run build:cli",
+    "cli": "npm run build:cli && node dist-cli/cli/run.js",
+    "typecheck": "tsc --noEmit",
+    "docker:verifier": "docker build -t hembench-verifier ./verification"
+  },
+  "dependencies": {
+    "@benchlocal/core": "^0.1.0",
+    "@benchlocal/sdk": "^0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "tsc-alias": "^1.8.10",
+    "typescript": "latest"
+  }
+}

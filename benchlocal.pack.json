@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "protocolVersion": 1,
+  "id": "hembench",
+  "name": "HemBench",
+  "author": "hemlang",
+  "version": "0.1.0",
+  "description": "Hemlock code-generation benchmark. 38 tasks across L1-L6 (syntax, stdlib, algorithms, systems, translation, debugging). Generated code is executed by a sandboxed Hemlock interpreter and compared against expected output.",
+  "entry": "./dist/benchlocal/index.js",
+  "samplingDefaults": {
+    "temperature": 0.2,
+    "maxTokens": 8192
+  },
+  "theme": {
+    "accent": "#5b8c5a"
+  },
+  "capabilities": {
+    "tools": false,
+    "multiTurn": false,
+    "streamingProgress": true,
+    "verification": true
+  },
+  "requirements": {
+    "benchlocal": {
+      "minVersion": "0.2.0"
+    },
+    "hostFeatures": ["inferenceEndpoints"]
+  },
+  "verifiers": [
+    {
+      "id": "hemlock-runner",
+      "transport": "http",
+      "required": true,
+      "defaultMode": "docker",
+      "docker": {
+        "buildContext": "./verification",
+        "listenPort": 4010,
+        "healthcheckPath": "/health"
+      }
+    }
+  ]
+}
